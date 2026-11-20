@@ -1,0 +1,16 @@
+{
+  "name": "desafio-marketplace-mongodb",
+  "version": "1.0.0",
+  "description": "Desafio Técnico Back-End: Engenharia de Dados com MongoDB — marketplace em Node.js + Express",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["nodejs", "express", "mongodb", "marketplace"],
+  "author": "Luka Gomes",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
