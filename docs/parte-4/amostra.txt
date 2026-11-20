@@ -1,0 +1,104 @@
+AMOSTRA DO BANCO "marketplace_seed"
+Gerada em: 20/11/2026, 20:37:18
+======================================================================
+
+Coleção: products
+----------------------------------------------------------------------
+Documentos:            1.000
+Tamanho dos dados:     149.8 KB
+Tamanho médio por doc: 153 bytes
+Índices (1):          _id_
+Documento de exemplo:
+{
+  _id: new ObjectId('6b00d95bc3c0f2954a9cbaab'),
+  sku: 'SKU-00001',
+  name: 'Produto Exemplo 1',
+  category: 'Casa e Cozinha',
+  price: 228.93,
+  stock: 248,
+  sellerId: 'SELLER-2',
+  active: true
+}
+
+Coleção: users
+----------------------------------------------------------------------
+Documentos:            5.000
+Tamanho dos dados:     698.7 KB
+Tamanho médio por doc: 143 bytes
+Índices (1):          _id_
+Documento de exemplo:
+{
+  _id: new ObjectId('6b00d95bc3c0f2954a9cbe93'),
+  name: 'Cliente 1',
+  email: 'cliente1@exemplo.com',
+  city: 'São Paulo',
+  walletBalance: 497.09,
+  createdAt: 2026-09-09T23:35:55.729Z
+}
+
+Coleção: orders
+----------------------------------------------------------------------
+Documentos:            100.000
+Tamanho dos dados:     39.17 MB
+Tamanho médio por doc: 410 bytes
+Índices (1):          _id_
+Documento de exemplo:
+{
+  _id: new ObjectId('6b00d95bc3c0f2954a9cd21b'),
+  userId: new ObjectId('6b00d95bc3c0f2954a9cd15b'),
+  shippingCity: 'Rio de Janeiro',
+  status: 'PENDING',
+  items: [
+    {
+      productId: new ObjectId('6b00d95bc3c0f2954a9cbdbe'),
+      sku: 'SKU-00788',
+      category: 'Livros',
+      unitPrice: 148.59,
+      quantity: 1
+    },
+    {
+      productId: new ObjectId('6b00d95bc3c0f2954a9cbdb0'),
+      sku: 'SKU-00774',
+      category: 'Livros',
+      unitPrice: 288.96,
+      quantity: 1
+    },
+    {
+      productId: new ObjectId('6b00d95bc3c0f2954a9cbb1a'),
+      sku: 'SKU-00112',
+      category: 'Livros',
+      unitPrice: 128.19,
+      quantity: 1
+    }
+  ],
+  totalAmount: 565.74,
+  createdAt: 2026-09-15T23:35:55.770Z
+}
+
+======================================================================
+Distribuição dos pedidos por status
+----------------------------------------------------------------------
+SHIPPED      20.184
+DELIVERED    20.106
+PAID         20.044
+PENDING      19.880
+CANCELED     19.786
+
+Distribuição dos pedidos por cidade de entrega
+----------------------------------------------------------------------
+Curitiba         17.273
+Recife           17.159
+São Paulo        16.985
+Porto Alegre     16.613
+Rio de Janeiro   16.188
+Belo Horizonte   15.782
+
+Período e volume dos pedidos
+----------------------------------------------------------------------
+Pedido mais antigo:    2026-05-24
+Pedido mais recente:   2026-11-20
+Soma de totalAmount:   R$ 134.865.937,55
+Média de itens/pedido: 2.50
+
+Observação: as coleções possuem apenas o índice padrão "_id_" (sem índices secundários),
+conforme o enunciado. A otimização é tratada na Tarefa 3.

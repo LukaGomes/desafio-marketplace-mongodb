@@ -8,6 +8,39 @@ O projeto evolui ao longo das entregas do desafio. Cada entrega está marcada co
 | Parte 1 | `parte-1` | API com armazenamento em memória |
 | Parte 2 | `parte-2` | Testes da API no Insomnia (`docs/parte-2`) |
 | Parte 3 | `parte-3` | Persistência com MongoDB (Mongoose) |
+| Parte 4 | `parte-4` | Script de seed (1.000 produtos, 5.000 usuários, 100.000 pedidos) |
+
+## Parte 4: script de seed
+
+Gera uma base de teste com **1.000 produtos, 5.000 usuários e 100.000 pedidos** usando `insertMany` em lotes de 10.000.
+As coleções ficam propositalmente **sem índices secundários** (a otimização é feita na Tarefa 3).
+
+### Pré-requisito: replica set
+
+A URI usa `?replicaSet=rs0`, necessário para as transações da Tarefa 4. Para transformar um MongoDB local em replica set de um nó:
+
+1. No `mongod.cfg`, adicione:
+   ```yaml
+   replication:
+     replSetName: rs0
+   ```
+2. Reinicie o serviço do MongoDB.
+3. No `mongosh`: `rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "localhost:27017" }] })`
+
+### Como executar
+
+```bash
+npm install
+npm run seed      # gera os dados no banco marketplace_seed
+npm run amostra   # exibe a amostra do banco e salva em docs/parte-4/amostra.txt
+```
+
+### Ajustes em relação ao script de referência
+
+- **Banco separado (`marketplace_seed`):** o seed executa `dropDatabase()`. Com o nome `marketplace` do exemplo, ele apagaria os dados da API da Parte 3. Há uma trava que impede o uso desse nome.
+- **URI e banco configuráveis** pelo `.env` (`SEED_MONGO_URI`, `SEED_DB_NAME`), com valores padrão.
+- **Conferência final:** tempo de execução e contagem de documentos por coleção.
+- **Mensagem de ajuda** quando o MongoDB ou o replica set não estão disponíveis.
 
 ## Parte 3: persistência com MongoDB
 
