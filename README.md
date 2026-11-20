@@ -6,12 +6,43 @@ O projeto evolui ao longo das entregas do desafio. Cada entrega está marcada co
 | Entrega | Tag | Conteúdo |
 |---|---|---|
 | Parte 1 | `parte-1` | API com armazenamento em memória |
+| Parte 2 | `parte-2` | Testes da API no Insomnia (`docs/parte-2`) |
+| Parte 3 | `parte-3` | Persistência com MongoDB (Mongoose) |
 
-## Parte 1: API em memória
+## Parte 3: persistência com MongoDB
+
+A partir da Parte 3, o `index.js` usa **MongoDB com Mongoose**. A versão em memória continua disponível na tag `parte-1`.
+
+### Como executar
+
+1. Tenha o MongoDB rodando localmente (ou um cluster no MongoDB Atlas).
+2. Copie `.env.example` para `.env` e ajuste a `MONGO_URI`, se necessário.
+3. Instale e inicie:
+
+```bash
+npm install
+node index.js
+```
+
+As rotas são as mesmas da Parte 1. A diferença é que os ids passam a ser `ObjectId` do MongoDB (ex.: `"674e1f2a9b3c4d5e6f708192"`), e não `1`, `2`.
+
+### Melhorias em relação ao exemplo de referência
+
+- **Baixa de estoque atômica:** `findOneAndUpdate({ _id, estoque: { $gte: qtd } }, { $inc: { estoque: -qtd } })`. A verificação e o desconto acontecem numa única operação, então duas compras simultâneas não vendem o mesmo estoque (o exemplo lia, subtraía e chamava `save()`).
+- **Compensação de estoque:** se a gravação do pedido falhar, o estoque descontado é devolvido.
+- **Servidor só sobe após conectar ao banco:** no exemplo, a API aceitava requisições mesmo sem conexão, e elas ficavam travadas até dar erro.
+- **Validações no schema:** preço maior que zero, estoque e quantidade inteiros e não negativos, nome obrigatório.
+- **Ids validados antes da consulta:** um id malformado retorna `400`, e não um erro genérico.
+- **Pedido guarda `precoUnitario`**, e o `/resumo` calcula os totais no banco (`countDocuments` e `aggregate`).
+- **Índices** em `produtos.estoque` (vitrine) e `pedidos.compradorId + data` (pedidos por comprador).
+- **`.env` fora do Git:** a URI pode conter usuário e senha. O repositório traz um `.env.example`.
+
+## Parte 1: API em memória (tag `parte-1`)
 
 ### Como executar
 
 ```bash
+git checkout parte-1
 npm install
 node index.js
 ```

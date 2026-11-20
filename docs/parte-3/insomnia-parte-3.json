@@ -1,0 +1,172 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-20T22:50:00.000Z",
+  "__export_source": "insomnia.desktop.app:v10",
+  "resources": [
+    {
+      "_id": "wrk_marketplace_parte3",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Desafio Marketplace - Parte 3",
+      "description": "Roteiro de testes da API com MongoDB. Após os requests 1, 2 e 3, copie o _id retornado para o environment (vendedorId, compradorId, produtoId).",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_marketplace_p3",
+      "_type": "environment",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "vendedorId": "",
+        "compradorId": "",
+        "produtoId": ""
+      }
+    },
+    {
+      "_id": "req_parte3_1",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "1. Criar vendedor",
+      "method": "POST",
+      "url": "{{ _.base_url }}/usuarios",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Loja Tech\",\n  \"tipo\": \"vendedor\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_2",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "2. Criar comprador",
+      "method": "POST",
+      "url": "{{ _.base_url }}/usuarios",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"João Silva\",\n  \"tipo\": \"comprador\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_3",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "3. Cadastrar produto",
+      "method": "POST",
+      "url": "{{ _.base_url }}/produtos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"vendedorId\": \"{{ _.vendedorId }}\",\n  \"nome\": \"Teclado Mecânico\",\n  \"preco\": 250,\n  \"estoque\": 5\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_4",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "4. Ver vitrine (com nome do vendedor)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/produtos",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_5",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "5. Fazer compra",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pedidos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"compradorId\": \"{{ _.compradorId }}\",\n  \"produtoId\": \"{{ _.produtoId }}\",\n  \"quantidade\": 2\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_6",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "6. Conferir estoque (deve ser 3)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/produtos/{{ _.produtoId }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 6,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_7",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "7. Visão geral do sistema",
+      "method": "GET",
+      "url": "{{ _.base_url }}/resumo",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 7,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_parte3_8",
+      "_type": "request",
+      "parentId": "wrk_marketplace_parte3",
+      "name": "8. Listar pedidos (com nomes)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pedidos",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 8,
+      "settingFollowRedirects": "global"
+    }
+  ]
+}

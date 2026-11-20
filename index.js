@@ -1,276 +1,316 @@
 // Desafio Técnico Back-End: Engenharia de Dados com MongoDB
-// Parte 1 — Marketplace com armazenamento em memória (Node.js + Express)
+// Parte 3 — Persistência de dados com MongoDB (Mongoose)
 
+require('dotenv').config({ quiet: true });
 const express = require('express');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
 
 // ---------------------------------------------------------------------------
-// Banco de dados em memória
-// ---------------------------------------------------------------------------
-const db = {
-  usuarios: [],
-  produtos: [],
-  pedidos: [],
-};
-
-// Contadores próprios: o id nunca se repete, mesmo que um registro seja removido
-// (usar array.length + 1 geraria ids duplicados após uma exclusão).
-const proximoId = { usuarios: 1, produtos: 1, pedidos: 1 };
-const gerarId = (colecao) => proximoId[colecao]++;
-
-// ---------------------------------------------------------------------------
-// Funções auxiliares de validação
+// MODELOS (SCHEMAS)
 // ---------------------------------------------------------------------------
 
-// Aceita 1 ou "1" (Insomnia/Postman podem enviar como texto) e devolve número inteiro positivo.
-function paraId(valor) {
-  const n = Number(valor);
-  return Number.isInteger(n) && n > 0 ? n : null;
-}
+const UsuarioSchema = new mongoose.Schema(
+  {
+    nome: { type: String, required: true, trim: true, minlength: 1 },
+    tipo: { type: String, enum: ['vendedor', 'comprador'], required: true },
+  },
+  { timestamps: true },
+);
+const Usuario = mongoose.model('Usuario', UsuarioSchema);
 
-function inteiroPositivo(valor) {
-  const n = Number(valor);
-  return Number.isInteger(n) && n > 0 ? n : null;
-}
+const ProdutoSchema = new mongoose.Schema(
+  {
+    vendedorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    nome: { type: String, required: true, trim: true, minlength: 1 },
+    preco: { type: Number, required: true, min: [0.01, 'O preço deve ser maior que zero.'] },
+    estoque: {
+      type: Number,
+      required: true,
+      min: [0, 'O estoque não pode ser negativo.'],
+      validate: { validator: Number.isInteger, message: 'O estoque deve ser um número inteiro.' },
+    },
+  },
+  { timestamps: true },
+);
+// Índice para a vitrine, que filtra por estoque > 0
+ProdutoSchema.index({ estoque: 1 });
+const Produto = mongoose.model('Produto', ProdutoSchema);
 
-function inteiroNaoNegativo(valor) {
-  const n = Number(valor);
-  return Number.isInteger(n) && n >= 0 ? n : null;
-}
+const PedidoSchema = new mongoose.Schema({
+  compradorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+  produtoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Produto', required: true },
+  quantidade: {
+    type: Number,
+    required: true,
+    min: [1, 'A quantidade deve ser maior que zero.'],
+    validate: { validator: Number.isInteger, message: 'A quantidade deve ser um número inteiro.' },
+  },
+  // "Retrato" do momento da compra: se o preço do produto mudar, o pedido mantém o valor pago
+  precoUnitario: { type: Number, required: true },
+  valorTotal: { type: Number, required: true },
+  data: { type: Date, default: Date.now },
+});
+// Índice para listar os pedidos de um comprador (GET /pedidos?compradorId=...)
+PedidoSchema.index({ compradorId: 1, data: -1 });
+const Pedido = mongoose.model('Pedido', PedidoSchema);
 
-function precoValido(valor) {
-  const n = Number(valor);
-  return Number.isFinite(n) && n > 0 ? arredondar(n) : null;
-}
+// ---------------------------------------------------------------------------
+// FUNÇÕES AUXILIARES
+// ---------------------------------------------------------------------------
 
-// Evita resíduos de ponto flutuante (ex.: 0.1 * 3 = 0.30000000000000004).
+// Evita resíduos de ponto flutuante (ex.: 0.1 * 3 = 0.30000000000000004)
 const arredondar = (valor) => Math.round(valor * 100) / 100;
 
-const textoValido = (valor) => typeof valor === 'string' && valor.trim().length > 0;
+// Um ObjectId válido tem exatamente 24 caracteres hexadecimais
+const idValido = (id) => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
 
-const buscarUsuario = (id) => db.usuarios.find((u) => u.id === id);
-const buscarProduto = (id) => db.produtos.find((p) => p.id === id);
+const inteiroPositivo = (valor) => {
+  const n = Number(valor);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+// Envolve rotas assíncronas: qualquer erro vai para o middleware de erros no final do arquivo
+const rota = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 
 // ---------------------------------------------------------------------------
-// 1. Usuários (compradores e vendedores)
+// ROTAS — USUÁRIOS
 // ---------------------------------------------------------------------------
 
-// Cadastrar usuário
-app.post('/usuarios', (req, res) => {
+// 1. Cadastrar usuário
+app.post('/usuarios', rota(async (req, res) => {
   const { nome, tipo } = req.body ?? {};
-
-  if (!textoValido(nome) || !['vendedor', 'comprador'].includes(tipo)) {
-    return res
-      .status(400)
-      .json({ erro: 'Informe nome e tipo válido (vendedor/comprador).' });
-  }
-
-  const novoUsuario = {
-    id: gerarId('usuarios'),
-    nome: nome.trim(),
-    tipo,
-  };
-
-  db.usuarios.push(novoUsuario);
+  const novoUsuario = await Usuario.create({ nome, tipo });
   res.status(201).json(novoUsuario);
-});
+}));
 
 // Listar usuários (filtro opcional: /usuarios?tipo=vendedor)
-app.get('/usuarios', (req, res) => {
-  const { tipo } = req.query;
-  const lista = tipo ? db.usuarios.filter((u) => u.tipo === tipo) : db.usuarios;
-  res.json(lista);
-});
+app.get('/usuarios', rota(async (req, res) => {
+  const filtro = req.query.tipo ? { tipo: req.query.tipo } : {};
+  res.json(await Usuario.find(filtro).sort({ createdAt: 1 }));
+}));
 
 // Buscar usuário por id
-app.get('/usuarios/:id', (req, res) => {
-  const usuario = buscarUsuario(paraId(req.params.id));
+app.get('/usuarios/:id', rota(async (req, res) => {
+  if (!idValido(req.params.id)) return res.status(400).json({ erro: 'Id inválido.' });
+  const usuario = await Usuario.findById(req.params.id);
   if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado.' });
   res.json(usuario);
-});
+}));
 
 // ---------------------------------------------------------------------------
-// 2. Produtos
+// ROTAS — PRODUTOS
 // ---------------------------------------------------------------------------
 
-// Anunciar produto (apenas vendedores)
-app.post('/produtos', (req, res) => {
+// 2. Anunciar produto (apenas vendedores)
+app.post('/produtos', rota(async (req, res) => {
   const { vendedorId, nome, preco, estoque } = req.body ?? {};
 
-  const id = paraId(vendedorId);
-  const usuario = id && buscarUsuario(id);
-
-  if (!usuario) {
-    return res.status(404).json({ erro: 'Vendedor não encontrado.' });
+  if (!idValido(vendedorId)) {
+    return res.status(400).json({ erro: 'Informe um vendedorId válido.' });
   }
+
+  const usuario = await Usuario.findById(vendedorId);
+  if (!usuario) return res.status(404).json({ erro: 'Vendedor não encontrado.' });
   if (usuario.tipo !== 'vendedor') {
-    return res
-      .status(403)
-      .json({ erro: 'Apenas usuários do tipo vendedor podem anunciar produtos.' });
+    return res.status(403).json({ erro: 'Apenas usuários do tipo vendedor podem anunciar produtos.' });
   }
 
-  const precoNumerico = precoValido(preco);
-  const estoqueNumerico = inteiroNaoNegativo(estoque);
-
-  if (!textoValido(nome) || precoNumerico === null || estoqueNumerico === null) {
-    return res.status(400).json({
-      erro: 'Informe nome, preço maior que zero e estoque inteiro maior ou igual a zero.',
-    });
-  }
-
-  const novoProduto = {
-    id: gerarId('produtos'),
-    vendedorId: id,
-    nome: nome.trim(),
-    preco: precoNumerico,
-    estoque: estoqueNumerico,
-  };
-
-  db.produtos.push(novoProduto);
+  const novoProduto = await Produto.create({
+    vendedorId,
+    nome,
+    preco: preco === undefined ? undefined : arredondar(Number(preco)),
+    estoque,
+  });
   res.status(201).json(novoProduto);
-});
+}));
 
-// Listar vitrine (somente produtos com estoque disponível)
-app.get('/produtos', (req, res) => {
-  const disponiveis = db.produtos.filter((p) => p.estoque > 0);
+// 3. Listar vitrine (traz o nome do vendedor com populate)
+app.get('/produtos', rota(async (req, res) => {
+  const disponiveis = await Produto.find({ estoque: { $gt: 0 } })
+    .populate('vendedorId', 'nome') // mostra o nome da loja em vez de apenas o id
+    .sort({ nome: 1 });
   res.json(disponiveis);
-});
+}));
 
 // Buscar produto por id (inclusive sem estoque)
-app.get('/produtos/:id', (req, res) => {
-  const produto = buscarProduto(paraId(req.params.id));
+app.get('/produtos/:id', rota(async (req, res) => {
+  if (!idValido(req.params.id)) return res.status(400).json({ erro: 'Id inválido.' });
+  const produto = await Produto.findById(req.params.id).populate('vendedorId', 'nome');
   if (!produto) return res.status(404).json({ erro: 'Produto não encontrado.' });
   res.json(produto);
-});
+}));
 
 // ---------------------------------------------------------------------------
-// 3. Pedidos
+// ROTAS — PEDIDOS
 // ---------------------------------------------------------------------------
 
-// Realizar compra (apenas compradores)
-app.post('/pedidos', (req, res) => {
+// 4. Realizar compra (apenas compradores)
+app.post('/pedidos', rota(async (req, res) => {
   const { compradorId, produtoId, quantidade } = req.body ?? {};
 
-  const idComprador = paraId(compradorId);
-  const comprador = idComprador && buscarUsuario(idComprador);
-
-  if (!comprador) {
-    return res.status(404).json({ erro: 'Comprador não encontrado.' });
-  }
-  if (comprador.tipo !== 'comprador') {
-    return res
-      .status(403)
-      .json({ erro: 'Apenas usuários do tipo comprador podem realizar pedidos.' });
+  if (!idValido(compradorId) || !idValido(produtoId)) {
+    return res.status(400).json({ erro: 'Informe compradorId e produtoId válidos.' });
   }
 
-  // Sem esta validação, quantidade ausente transformaria o estoque em NaN
-  // e quantidade negativa aumentaria o estoque.
+  // Sem esta validação, quantidade negativa aumentaria o estoque
   const qtd = inteiroPositivo(quantidade);
   if (qtd === null) {
-    return res
-      .status(400)
-      .json({ erro: 'Informe uma quantidade inteira maior que zero.' });
+    return res.status(400).json({ erro: 'Informe uma quantidade inteira maior que zero.' });
   }
 
-  const produto = buscarProduto(paraId(produtoId));
-  if (!produto) {
-    return res.status(404).json({ erro: 'Produto não encontrado.' });
+  const comprador = await Usuario.findById(compradorId);
+  if (!comprador) return res.status(404).json({ erro: 'Comprador não encontrado.' });
+  if (comprador.tipo !== 'comprador') {
+    return res.status(403).json({ erro: 'Apenas usuários do tipo comprador podem realizar pedidos.' });
   }
-  if (produto.estoque < qtd) {
+
+  // Baixa de estoque ATÔMICA: a verificação (estoque >= qtd) e o desconto ($inc) acontecem
+  // na mesma operação do banco. Duas compras simultâneas não conseguem vender o mesmo estoque,
+  // o que poderia acontecer com o padrão "ler o produto -> subtrair -> save()".
+  const produto = await Produto.findOneAndUpdate(
+    { _id: produtoId, estoque: { $gte: qtd } },
+    { $inc: { estoque: -qtd } },
+    { returnDocument: 'after' }, // devolve o produto já com o estoque atualizado
+  );
+
+  if (!produto) {
+    // Nada foi atualizado: o produto não existe ou o estoque é insuficiente
+    const existente = await Produto.findById(produtoId);
+    if (!existente) return res.status(404).json({ erro: 'Produto não encontrado.' });
     return res.status(400).json({
       erro: 'Estoque insuficiente.',
-      estoqueDisponivel: produto.estoque,
+      estoqueDisponivel: existente.estoque,
     });
   }
 
-  // Atualiza o estoque e calcula o valor total.
-  // Em memória, este trecho é síncrono: nenhuma outra requisição executa no meio dele.
-  produto.estoque -= qtd;
+  try {
+    const novoPedido = await Pedido.create({
+      compradorId,
+      produtoId,
+      quantidade: qtd,
+      precoUnitario: produto.preco,
+      valorTotal: arredondar(produto.preco * qtd),
+    });
+    res.status(201).json(novoPedido);
+  } catch (erro) {
+    // Compensação: se o pedido não puder ser gravado, devolve o estoque já descontado.
+    // (Uma transação ACID completa exige replica set e é tratada na Tarefa 4.)
+    await Produto.updateOne({ _id: produtoId }, { $inc: { estoque: qtd } });
+    throw erro;
+  }
+}));
 
-  const novoPedido = {
-    id: gerarId('pedidos'),
-    compradorId: comprador.id,
-    produtoId: produto.id,
-    quantidade: qtd,
-    // "Retrato" do momento da compra: se o preço mudar depois, o pedido mantém o valor pago.
-    precoUnitario: produto.preco,
-    valorTotal: arredondar(produto.preco * qtd),
-    data: new Date().toISOString(),
-  };
-
-  db.pedidos.push(novoPedido);
-  res.status(201).json(novoPedido);
-});
-
-// Listar pedidos (filtro opcional: /pedidos?compradorId=2)
-app.get('/pedidos', (req, res) => {
+// Listar pedidos (filtro opcional: /pedidos?compradorId=...)
+app.get('/pedidos', rota(async (req, res) => {
   const { compradorId } = req.query;
-  const id = compradorId !== undefined ? paraId(compradorId) : null;
-  const lista =
-    compradorId !== undefined
-      ? db.pedidos.filter((p) => p.compradorId === id)
-      : db.pedidos;
-  res.json(lista);
-});
+  if (compradorId !== undefined && !idValido(compradorId)) {
+    return res.status(400).json({ erro: 'compradorId inválido.' });
+  }
+  const filtro = compradorId ? { compradorId } : {};
+  const pedidos = await Pedido.find(filtro)
+    .populate('compradorId', 'nome')
+    .populate('produtoId', 'nome')
+    .sort({ data: -1 });
+  res.json(pedidos);
+}));
 
 // Buscar pedido por id
-app.get('/pedidos/:id', (req, res) => {
-  const pedido = db.pedidos.find((p) => p.id === paraId(req.params.id));
+app.get('/pedidos/:id', rota(async (req, res) => {
+  if (!idValido(req.params.id)) return res.status(400).json({ erro: 'Id inválido.' });
+  const pedido = await Pedido.findById(req.params.id)
+    .populate('compradorId', 'nome')
+    .populate('produtoId', 'nome');
   if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado.' });
   res.json(pedido);
-});
+}));
 
 // ---------------------------------------------------------------------------
-// 4. Visão geral do sistema
+// VISÃO GERAL DO SISTEMA (cálculos feitos no banco)
 // ---------------------------------------------------------------------------
-app.get('/resumo', (req, res) => {
-  const faturamentoTotal = arredondar(
-    db.pedidos.reduce((soma, p) => soma + p.valorTotal, 0),
-  );
+app.get('/resumo', rota(async (req, res) => {
+  const [vendedores, compradores, totalProdutos, naVitrine, vendas] = await Promise.all([
+    Usuario.countDocuments({ tipo: 'vendedor' }),
+    Usuario.countDocuments({ tipo: 'comprador' }),
+    Produto.countDocuments(),
+    Produto.countDocuments({ estoque: { $gt: 0 } }),
+    Pedido.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          itensVendidos: { $sum: '$quantidade' },
+          faturamentoTotal: { $sum: '$valorTotal' },
+        },
+      },
+    ]),
+  ]);
+
+  const v = vendas[0] ?? { total: 0, itensVendidos: 0, faturamentoTotal: 0 };
 
   res.json({
-    usuarios: {
-      total: db.usuarios.length,
-      vendedores: db.usuarios.filter((u) => u.tipo === 'vendedor').length,
-      compradores: db.usuarios.filter((u) => u.tipo === 'comprador').length,
-    },
-    produtos: {
-      total: db.produtos.length,
-      naVitrine: db.produtos.filter((p) => p.estoque > 0).length,
-      semEstoque: db.produtos.filter((p) => p.estoque === 0).length,
-    },
+    usuarios: { total: vendedores + compradores, vendedores, compradores },
+    produtos: { total: totalProdutos, naVitrine, semEstoque: totalProdutos - naVitrine },
     pedidos: {
-      total: db.pedidos.length,
-      itensVendidos: db.pedidos.reduce((soma, p) => soma + p.quantidade, 0),
-      faturamentoTotal,
+      total: v.total,
+      itensVendidos: v.itensVendidos,
+      faturamentoTotal: arredondar(v.faturamentoTotal),
     },
   });
-});
+}));
 
 // ---------------------------------------------------------------------------
-// Tratamento de rotas inexistentes e erros
+// TRATAMENTO DE ROTAS INEXISTENTES E ERROS
 // ---------------------------------------------------------------------------
 
-// Rota não cadastrada: responde em JSON em vez da página HTML padrão do Express
 app.use((req, res) => {
   res.status(404).json({ erro: `Rota ${req.method} ${req.originalUrl} não encontrada.` });
 });
 
-// JSON malformado no corpo da requisição ou erro inesperado
 app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ erro: 'JSON inválido no corpo da requisição.' });
+  }
+  if (err instanceof mongoose.Error.ValidationError) {
+    return res.status(400).json({
+      erro: 'Dados inválidos.',
+      detalhes: Object.values(err.errors).map((e) => e.message),
+    });
+  }
+  if (err instanceof mongoose.Error.CastError) {
+    return res.status(400).json({ erro: `Valor inválido para o campo ${err.path}.` });
   }
   console.error(err);
   res.status(500).json({ erro: 'Erro interno do servidor.' });
 });
 
 // ---------------------------------------------------------------------------
-// Inicia o servidor
+// CONEXÃO COM O MONGODB E INÍCIO DO SERVIDOR
 // ---------------------------------------------------------------------------
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Marketplace rodando em http://localhost:${PORT}`);
-});
+const MONGO_URI = process.env.MONGO_URI;
+
+async function iniciar() {
+  if (!MONGO_URI) {
+    console.error('Variável MONGO_URI não definida. Crie o arquivo .env (veja o .env.example).');
+    process.exit(1);
+  }
+
+  try {
+    // O servidor só começa a aceitar requisições depois que o banco está conectado
+    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+    console.log('Conectado ao MongoDB com sucesso!');
+
+    app.listen(PORT, () => {
+      console.log(`Marketplace rodando em http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('Erro ao conectar ao MongoDB:', err.message);
+    process.exit(1);
+  }
+}
+
+iniciar();
