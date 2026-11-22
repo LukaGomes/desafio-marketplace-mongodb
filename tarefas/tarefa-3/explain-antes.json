@@ -1,0 +1,179 @@
+{
+  "explainVersion": "1",
+  "queryPlanner": {
+    "namespace": "marketplace_seed.orders",
+    "parsedQuery": {
+      "$and": [
+        {
+          "shippingCity": {
+            "$eq": "São Paulo"
+          }
+        },
+        {
+          "status": {
+            "$eq": "DELIVERED"
+          }
+        },
+        {
+          "createdAt": {
+            "$gte": "2026-10-23T16:32:39.102Z"
+          }
+        }
+      ]
+    },
+    "indexFilterSet": false,
+    "queryHash": "4FD3C9F3",
+    "planCacheShapeHash": "4FD3C9F3",
+    "planCacheKey": "011AB4F9",
+    "optimizationTimeMillis": 0,
+    "optimizationTimeMicros": 331,
+    "maxIndexedOrSolutionsReached": false,
+    "maxIndexedAndSolutionsReached": false,
+    "maxScansToExplodeReached": false,
+    "prunedSimilarIndexes": false,
+    "winningPlan": {
+      "isCached": false,
+      "stage": "SORT",
+      "sortPattern": {
+        "createdAt": -1
+      },
+      "memLimit": 104857600,
+      "type": "simple",
+      "inputStage": {
+        "stage": "COLLSCAN",
+        "filter": {
+          "$and": [
+            {
+              "shippingCity": {
+                "$eq": "São Paulo"
+              }
+            },
+            {
+              "status": {
+                "$eq": "DELIVERED"
+              }
+            },
+            {
+              "createdAt": {
+                "$gte": "2026-10-23T16:32:39.102Z"
+              }
+            }
+          ]
+        },
+        "nss": "marketplace_seed.orders",
+        "direction": "forward"
+      }
+    },
+    "rejectedPlans": []
+  },
+  "executionStats": {
+    "executionSuccess": true,
+    "nReturned": 540,
+    "executionTimeMillis": 200,
+    "executionTimeMicros": 200894,
+    "totalKeysExamined": 0,
+    "totalDocsExamined": 100000,
+    "executionStages": {
+      "isCached": false,
+      "stage": "SORT",
+      "nReturned": 540,
+      "executionTimeMillisEstimate": 186,
+      "works": 100542,
+      "advanced": 540,
+      "needTime": 100001,
+      "needYield": 0,
+      "saveState": 13,
+      "restoreState": 13,
+      "isEOF": 1,
+      "sortPattern": {
+        "createdAt": -1
+      },
+      "memLimit": 104857600,
+      "type": "simple",
+      "totalDataSizeSorted": 240798,
+      "usedDisk": false,
+      "spills": 0,
+      "spilledRecords": 0,
+      "spilledBytes": 0,
+      "spilledDataStorageSize": 0,
+      "peakTrackedMemBytes": 240798,
+      "inputStage": {
+        "stage": "COLLSCAN",
+        "filter": {
+          "$and": [
+            {
+              "shippingCity": {
+                "$eq": "São Paulo"
+              }
+            },
+            {
+              "status": {
+                "$eq": "DELIVERED"
+              }
+            },
+            {
+              "createdAt": {
+                "$gte": "2026-10-23T16:32:39.102Z"
+              }
+            }
+          ]
+        },
+        "nReturned": 540,
+        "executionTimeMillisEstimate": 157,
+        "works": 100001,
+        "advanced": 540,
+        "needTime": 99460,
+        "needYield": 0,
+        "saveState": 13,
+        "restoreState": 13,
+        "isEOF": 1,
+        "nss": "marketplace_seed.orders",
+        "direction": "forward",
+        "docsExamined": 100000,
+        "seeks": 0
+      }
+    }
+  },
+  "queryShapeHash": "07BCAD3D02868F1C17BDBD13FF5C3456D66E39EB1F6E14550914868E50684140",
+  "peakTrackedMemBytes": 240798,
+  "command": {
+    "find": "orders",
+    "filter": {
+      "shippingCity": "São Paulo",
+      "status": "DELIVERED",
+      "createdAt": {
+        "$gte": "2026-10-23T16:32:39.102Z"
+      }
+    },
+    "sort": {
+      "createdAt": -1
+    },
+    "$db": "marketplace_seed"
+  },
+  "serverInfo": {
+    "host": "Book4_Luka",
+    "port": 27017,
+    "version": "9.0.4",
+    "gitVersion": "64ade602b836c9adeffba7fa038c887ffab56196"
+  },
+  "serverParameters": {
+    "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+    "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+    "internalQueryProhibitBlockingMergeOnMongoS": 0,
+    "internalQueryFrameworkControl": "trySbeRestricted",
+    "internalQueryPlannerIgnoreIndexWithCollationForRegex": 1
+  },
+  "ok": 1,
+  "$clusterTime": {
+    "clusterTime": {
+      "$timestamp": "7711034625102970881"
+    },
+    "signature": {
+      "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "keyId": 0
+    }
+  },
+  "operationTime": {
+    "$timestamp": "7711034625102970881"
+  }
+}
