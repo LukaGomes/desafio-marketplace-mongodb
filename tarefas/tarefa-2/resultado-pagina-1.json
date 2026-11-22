@@ -1,0 +1,126 @@
+{
+  "executadoEm": "2026-11-22T16:17:42.783Z",
+  "banco": "marketplace_seed",
+  "relatorio1": {
+    "dataInicial": "2026-08-24T16:17:42.783Z",
+    "tempoMs": 1012,
+    "resultado": [
+      {
+        "itensVendidos": 34305,
+        "categoria": "Livros",
+        "faturamentoTotal": 9050259.87,
+        "linhasDePedido": 17128,
+        "ticketMedioPorItem": 263.82
+      },
+      {
+        "itensVendidos": 29448,
+        "categoria": "Esportes",
+        "faturamentoTotal": 8218819.75,
+        "linhasDePedido": 14688,
+        "ticketMedioPorItem": 279.1
+      },
+      {
+        "itensVendidos": 30802,
+        "categoria": "Eletrônicos",
+        "faturamentoTotal": 8064691.37,
+        "linhasDePedido": 15385,
+        "ticketMedioPorItem": 261.82
+      },
+      {
+        "itensVendidos": 27608,
+        "categoria": "Moda",
+        "faturamentoTotal": 7572092.01,
+        "linhasDePedido": 13826,
+        "ticketMedioPorItem": 274.27
+      },
+      {
+        "itensVendidos": 26641,
+        "categoria": "Casa e Cozinha",
+        "faturamentoTotal": 7222069.98,
+        "linhasDePedido": 13320,
+        "ticketMedioPorItem": 271.09
+      }
+    ]
+  },
+  "relatorio2": {
+    "tempoMs": 179,
+    "resultado": {
+      "dados": [
+        {
+          "quantidadePedidos": 20,
+          "userId": "6b00d95bc3c0f2954a9cd16d",
+          "nome": "Cliente 4827",
+          "email": "cliente4827@exemplo.com",
+          "totalGasto": 33422.71
+        },
+        {
+          "quantidadePedidos": 19,
+          "userId": "6b00d95bc3c0f2954a9cc368",
+          "nome": "Cliente 1238",
+          "email": "cliente1238@exemplo.com",
+          "totalGasto": 32975.67
+        },
+        {
+          "quantidadePedidos": 23,
+          "userId": "6b00d95bc3c0f2954a9cc60e",
+          "nome": "Cliente 1916",
+          "email": "cliente1916@exemplo.com",
+          "totalGasto": 32748.17
+        },
+        {
+          "quantidadePedidos": 21,
+          "userId": "6b00d95bc3c0f2954a9cc7d4",
+          "nome": "Cliente 2370",
+          "email": "cliente2370@exemplo.com",
+          "totalGasto": 32583.58
+        },
+        {
+          "quantidadePedidos": 20,
+          "userId": "6b00d95bc3c0f2954a9cccb4",
+          "nome": "Cliente 3618",
+          "email": "cliente3618@exemplo.com",
+          "totalGasto": 31897.72
+        },
+        {
+          "quantidadePedidos": 20,
+          "userId": "6b00d95bc3c0f2954a9cc897",
+          "nome": "Cliente 2565",
+          "email": "cliente2565@exemplo.com",
+          "totalGasto": 31121.76
+        },
+        {
+          "quantidadePedidos": 18,
+          "userId": "6b00d95bc3c0f2954a9cce22",
+          "nome": "Cliente 3984",
+          "email": "cliente3984@exemplo.com",
+          "totalGasto": 30679.57
+        },
+        {
+          "quantidadePedidos": 21,
+          "userId": "6b00d95bc3c0f2954a9cd199",
+          "nome": "Cliente 4871",
+          "email": "cliente4871@exemplo.com",
+          "totalGasto": 30573.55
+        },
+        {
+          "quantidadePedidos": 19,
+          "userId": "6b00d95bc3c0f2954a9cc82a",
+          "nome": "Cliente 2456",
+          "email": "cliente2456@exemplo.com",
+          "totalGasto": 30470.01
+        },
+        {
+          "quantidadePedidos": 25,
+          "userId": "6b00d95bc3c0f2954a9cd20b",
+          "nome": "Cliente 4985",
+          "email": "cliente4985@exemplo.com",
+          "totalGasto": 30365.83
+        }
+      ],
+      "totalClientes": 840,
+      "pagina": 1,
+      "tamanhoPagina": 10,
+      "totalPaginas": 84
+    }
+  }
+}
