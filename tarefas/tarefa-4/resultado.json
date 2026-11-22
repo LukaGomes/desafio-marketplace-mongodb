@@ -1,0 +1,160 @@
+{
+  "executadoEm": "2026-11-22T16:48:11.165Z",
+  "banco": "marketplace_seed",
+  "dadosDeTeste": {
+    "cliente": {
+      "_id": "6b00d95bc3c0f2954a9cc27b",
+      "name": "Cliente 1001",
+      "saldoInicial": 1652.15
+    },
+    "produto": {
+      "_id": "6b00d95bc3c0f2954a9cbab7",
+      "sku": "SKU-00013",
+      "price": 21.32,
+      "estoqueInicial": 265
+    },
+    "clientePobre": {
+      "_id": "6b00d95bc3c0f2954a9cc296",
+      "name": "Cliente 1028",
+      "saldo": 103.03
+    },
+    "produtoCaro": {
+      "_id": "6b00d95bc3c0f2954a9cbaad",
+      "sku": "SKU-00003",
+      "price": 460.26,
+      "estoque": 362
+    }
+  },
+  "resultados": [
+    {
+      "cenario": "CENÁRIO 1: compra válida (2 unidades)",
+      "esperado": "COMMIT",
+      "status": "COMMIT",
+      "pedidoId": "6b031cc94ac7d9a2b383e970",
+      "totalAmount": 42.64,
+      "antes": {
+        "estoqueProduto": 265,
+        "saldoCliente": 1652.15,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 18,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100000
+      },
+      "depois": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "ok": true
+    },
+    {
+      "cenario": "CENÁRIO 2: estoque insuficiente",
+      "esperado": "ROLLBACK",
+      "status": "ROLLBACK",
+      "codigo": "ESTOQUE_INSUFICIENTE",
+      "motivo": "Estoque insuficiente: disponível 263, solicitado 264.",
+      "antes": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "depois": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "ok": true
+    },
+    {
+      "cenario": "CENÁRIO 3: saldo insuficiente",
+      "esperado": "ROLLBACK",
+      "status": "ROLLBACK",
+      "codigo": "SALDO_INSUFICIENTE",
+      "motivo": "Saldo insuficiente: saldo R$ 103.03, total R$ 460.26.",
+      "antes": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "depois": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "ok": true
+    },
+    {
+      "cenario": "CENÁRIO 4: erro no meio do processo (após debitar estoque e carteira)",
+      "esperado": "ROLLBACK",
+      "status": "ROLLBACK",
+      "codigo": "ERRO",
+      "motivo": "Falha simulada após debitar estoque e carteira (antes de gravar o pedido).",
+      "antes": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "depois": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "ok": true
+    },
+    {
+      "cenario": "CENÁRIO 5: produto inexistente",
+      "esperado": "ROLLBACK",
+      "status": "ROLLBACK",
+      "codigo": "PRODUTO_NAO_ENCONTRADO",
+      "motivo": "Produto não encontrado.",
+      "antes": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "depois": {
+        "estoqueProduto": 263,
+        "saldoCliente": 1609.51,
+        "estoqueProdutoCaro": 362,
+        "saldoClientePobre": 103.03,
+        "pedidosCliente": 19,
+        "pedidosClientePobre": 29,
+        "totalPedidos": 100001
+      },
+      "ok": true
+    }
+  ]
+}

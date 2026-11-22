@@ -9,7 +9,8 @@
     "seed": "node seed.js",
     "amostra": "node amostra.js",
     "tarefa2": "node tarefas/tarefa-2/relatorio.js",
-    "tarefa3": "node tarefas/tarefa-3/explain.js"
+    "tarefa3": "node tarefas/tarefa-3/explain.js",
+    "tarefa4": "node tarefas/tarefa-4/checkout.js"
   },
   "keywords": [
     "nodejs",

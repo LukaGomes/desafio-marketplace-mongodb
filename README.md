@@ -9,6 +9,21 @@ O projeto evolui ao longo das entregas do desafio. Cada entrega está marcada co
 | Parte 2 | `parte-2` | Testes da API no Insomnia (`docs/parte-2`) |
 | Parte 3 | `parte-3` | Persistência com MongoDB (Mongoose) |
 | Parte 4 | `parte-4` | Script de seed (1.000 produtos, 5.000 usuários, 100.000 pedidos) |
+| Tarefa 1 | `tarefa-1` | Modelagem de reviews e auditoria de pedidos ([SOLUCAO.md](tarefas/tarefa-1/SOLUCAO.md)) |
+| Tarefa 2 | `tarefa-2` | Aggregation Framework: faturamento por categoria e clientes VIP ([RELATORIO.md](tarefas/tarefa-2/RELATORIO.md)) |
+| Tarefa 3 | `tarefa-3` | Diagnóstico com `explain` e índice composto ESR ([SOLUCAO.md](tarefas/tarefa-3/SOLUCAO.md)) |
+| Tarefa 4 | `tarefa-4` | Checkout transacional ACID ([SOLUCAO.md](tarefas/tarefa-4/SOLUCAO.md)) |
+
+### Scripts das tarefas
+
+As tarefas 2, 3 e 4 usam o banco `marketplace_seed` gerado pela Parte 4 (com replica set `rs0`):
+
+```bash
+npm run tarefa2        # pipelines de agregação (página 1 do ranking)
+npm run tarefa2 -- 2   # página 2 do ranking
+npm run tarefa3        # explain antes/depois do índice ESR
+npm run tarefa4        # checkout transacional: cenários de commit e rollback
+```
 
 ## Parte 4: script de seed
 
